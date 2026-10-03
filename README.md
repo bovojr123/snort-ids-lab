@@ -124,7 +124,7 @@ Snort reported **"Snort successfully validated the configuration!"**, so the rul
 sudo truncate -s 0 /var/log/snort/alert
 ```
 
-![Figure 1: Snort configuration validated successfully, then the alert log cleared before testing](screenshots/01-snort-config-validated.png)
+<img width="1366" height="715" alt="ids 4" src="https://github.com/user-attachments/assets/a6bec4af-d208-4f21-a85b-28e353d3aa18" />
 
 *Figure 1: Snort configuration validated successfully, then the alert log cleared before testing.*
 
@@ -201,13 +201,15 @@ For each attack the same procedure was used:
 
 Four echo requests were sent from Kali. All four were answered (0% packet loss).
 
-![Figure 2: Ping from Kali to the Ubuntu defender, 4 packets sent and 4 received](screenshots/02-ping-attack-kali.png)
+<img width="1366" height="715" alt="ping attack" src="https://github.com/user-attachments/assets/331780a3-2494-4c03-a7ce-16eed455c6d8" />
+
 
 *Figure 2: Ping from Kali to the Ubuntu defender. 4 packets sent, 4 received.*
 
 Snort raised one alert per request, one second apart, matching the ping interval.
 
-![Figure 3: Snort alert `LAB ICMP ping detected`, four alerts from 192.168.56.104 to 192.168.56.103](screenshots/03-snort-icmp-alerts.png)
+<img width="1366" height="739" alt="ping result" src="https://github.com/user-attachments/assets/32753ade-4586-4fd4-b1ff-7aac9b500e14" />
+
 
 *Figure 3: Snort raises `LAB ICMP ping detected` (SID 1000001) four times, once per echo request.*
 
@@ -217,19 +219,22 @@ Snort raised one alert per request, one second apart, matching the ping interval
 
 **SYN scan (`nmap -sS`).** Nmap sends a SYN to each of the 1,000 most common ports without completing the handshake. Nmap reported all 1,000 ports as `filtered (no-response)`: the target did not reply, which is consistent with a host firewall dropping the packets. The scan took 34.94 seconds.
 
-![Figure 4: Nmap SYN scan from Kali, all 1000 ports filtered](screenshots/04-nmap-syn-scan-kali.png)
+<img width="1167" height="717" alt="syn sttack" src="https://github.com/user-attachments/assets/de7d1478-e91e-4123-a099-0808c365a0c6" />
+
 
 *Figure 4: Nmap SYN scan (`-sS`) from Kali. All 1,000 ports are reported as filtered.*
 
 Despite the target not replying, Snort still saw every probe and raised `LAB possible SYN port scan` (SID 1000002) rapidly across many different destination ports.
 
-![Figure 5: Snort SYN port scan alerts across many destination ports](screenshots/05-snort-syn-scan-alerts.png)
+<img width="1366" height="714" alt="syn result" src="https://github.com/user-attachments/assets/517d7b01-1915-4980-9f30-e63380c89167" />
+
 
 *Figure 5: Snort alerts for the SYN scan. The destination port changes with every alert (2041, 35500, 5280, 83, 7920 and so on), which is the signature of a port scan.*
 
 **Service and OS scan (`nmap -sV -A`).** This heavier scan attempts version detection, OS fingerprinting and traceroute. It completed in 44.72 seconds. Nmap could not identify the OS ("too many fingerprints match") because no open ports were available to probe.
 
-![Figure 6: Kali terminal showing Nmap SYN and service scan results](screenshots/06-nmap-service-os-scan-kali.png)
+<img width="1366" height="716" alt="syn sttack 2" src="https://github.com/user-attachments/assets/979d5688-4dae-40ed-bc5b-3ab40a574a84" />
+
 
 *Figure 6: The attacker machine runs `nmap -sS` and `nmap -sV -A` against the Ubuntu host. Both scans show the host is up, but all ports are filtered and OS details are inconclusive.*
 
@@ -239,7 +244,8 @@ This scan triggered **three** kinds of alert:
 - `LAB possible SYN port scan` (custom SID 1000002).
 - `SCAN nmap XMAS` (built-in rule `1:1228:7`, classified *Attempted Information Leak*, priority 2). Nmap's OS-fingerprinting probes include packets with unusual flag combinations (FIN, PSH, URG set together), which this default rule recognises.
 
-![Figure 7: Snort alerts during the Nmap scan, including the built-in `SCAN nmap XMAS` rule](screenshots/07-snort-os-scan-alerts.png)
+<img width="1365" height="711" alt="syn result 2" src="https://github.com/user-attachments/assets/881ce3a8-6735-437c-9ee5-f1e15a527175" />
+
 
 *Figure 7: Snort detects the Nmap scan using the custom ICMP and SYN rules and a built-in XMAS detection rule, confirming that the scan was recognised at the network level.*
 
@@ -249,7 +255,8 @@ This scan triggered **three** kinds of alert:
 
 Nikto was run against the Ubuntu web server. Its output ended with `+ 0 host(s) tested`: Nikto could not reach a web server on port 80, so no scan traffic was generated and the Nikto rule (SID 1000004) was **not exercised**.
 
-![Figure 8: Kali terminal showing Nikto reporting 0 hosts tested and Hydra timing out on SSH](screenshots/08-nikto-hydra-kali.png)
+<img width="1366" height="708" alt="brute attack 1" src="https://github.com/user-attachments/assets/6de37bcf-2169-4167-a7f2-a544063231c7" />
+
 
 *Figure 8: Nikto reports `0 host(s) tested`, while Hydra reports a timeout connecting to SSH. This shows that the target services were not reachable in the lab environment.*
 
@@ -263,10 +270,12 @@ A 21-entry wordlist was built and Hydra was pointed at the SSH service:
 seq 1 20 | sed 's/^/pass/' > pass.txt; echo labpass123 >> pass.txt
 hydra -l labuser -P pass.txt ssh://192.168.56.103 -t 4
 ```
+<img width="1366" height="708" alt="brute attack 1" src="https://github.com/user-attachments/assets/55778e3a-0add-4026-a10b-5638887c249b" />
 
 Hydra could not complete a connection (`ERROR: could not connect ... Timeout connecting`), so no passwords were actually tested. Snort nevertheless raised `LAB SSH Brute force attempt` (SID 1000003), because the rule counts repeated connection attempts to port 22 and does not require a successful login.
 
-![Figure 9: Snort SSH brute force alerts from 192.168.56.104 to port 22](screenshots/09-snort-ssh-alerts.png)
+<img width="1365" height="706" alt="brute result 1" src="https://github.com/user-attachments/assets/1b45a749-e86f-4bea-bdde-e869c8cef77e" />
+
 
 *Figure 9: Snort `LAB SSH Brute force attempt` alerts. The timestamps are about 2, 4 and 8 seconds apart.*
 
@@ -286,7 +295,8 @@ ip.addr eq 192.168.56.104 and ip.addr eq 192.168.56.103
 
 This leaves 4,151 packets (93.9% of the capture). The remaining packets are background traffic from other protocols.
 
-![Figure 10: Wireshark packet list showing ICMP echo requests and a burst of TCP SYN packets](screenshots/10-wireshark-packet-list.png)
+<img width="1304" height="696" alt="wire 1" src="https://github.com/user-attachments/assets/6bcc0929-95b5-4380-880c-4df2993fc663" />
+
 
 *Figure 10: Wireshark view of `attack1.pcap`. ICMP echo request/reply pairs (top) are followed by a burst of TCP SYN packets to many ports (bottom).*
 
@@ -299,7 +309,8 @@ This leaves 4,151 packets (93.9% of the capture). The remaining packets are back
 | Identical SYN packet shape | `Seq=0 Win=1024 Len=0 MSS=1460`, 60 bytes | The fixed window size of 1024 is a recognisable Nmap SYN-scan fingerprint. |
 | Almost no replies to the SYNs | See Figure 11 | Ports are filtered: the target is dropping probes silently. |
 
-![Figure 11: Wireshark Conversations window showing the attack traffic between Kali and Ubuntu](screenshots/11-wireshark-conversations.png)
+<img width="1307" height="696" alt="conver 1" src="https://github.com/user-attachments/assets/c5cf20e6-8918-47df-8c5a-eb99abefa08e" />
+
 
 *Figure 11: Wireshark Statistics → Conversations. One IPv4 conversation of 4,151 packets (254 kB), with 4,020 separate TCP conversations.*
 
